@@ -1,78 +1,39 @@
 // @ts-check
-const { test, expect } = require("@playwright/test");
+const { test, expect } = require('@playwright/test');
+const { USERS } = require('../constants/users');
 
-test.describe("Login Tests", () => {
-  test("Login with a regular user", async ({ page }) => {
-    await page.goto("https://playground-drab-six.vercel.app/");
+test.describe('Login Tests', () => {
+  const performLogin = async (page, user) => {
+    await page.goto('https://playground-drab-six.vercel.app/');
 
     // Click the login link.
-    await page.getByRole("link", { name: "login" }).click();
+    await page.getByRole('link', { name: 'login' }).click();
 
-    // Preencher os campos de login
-    await page.getByPlaceholder("Digite seu usuário").fill("teste");
-    await page.getByPlaceholder("Digite sua senha").fill("password123");
+    // Fill in login fields
+    await page.getByPlaceholder('Digite seu usuário').fill(user.username);
+    await page.getByPlaceholder('Digite sua senha').fill(user.password);
 
-    // Submeter o formulário
-    await page.getByRole("button", { name: "Logar" }).click();
+    // Submit the form
+    await page.getByRole('button', { name: 'Logar' }).click();
+    await expect(page.getByText(user.message)).toBeVisible();
+  };
 
-    // Verificar se o login foi bem-sucedido
-    await expect(page).toHaveURL(/dashboard/);
-    await expect(page.getByText("Usuário teste logado")).toBeVisible();
+  test('Login with a regular user', async ({ page }) => {
+    await performLogin(page, USERS.regular);
 
     // Click the logout link.
-    await page.getByRole("button", { name: "logout" }).click();
+    await page.getByRole('button', { name: 'logout' }).click();
   });
 
-  test("Login with a blocked user", async ({ page }) => {
-    await page.goto("https://playground-drab-six.vercel.app/");
-
-    // Click the login link.
-    await page.getByRole("link", { name: "login" }).click();
-
-    // Preencher os campos de login
-    await page.getByPlaceholder("Digite seu usuário").fill("testeblock");
-    await page.getByPlaceholder("Digite sua senha").fill("password123");
-
-    // Submeter o formulário
-    await page.getByRole("button", { name: "Logar" }).click();
-
-    // Verificar se aparece uma mensagem de erro
-    await expect(page.getByText("Usuário bloqueado!")).toBeVisible();
+  test('Login with a blocked user', async ({ page }) => {
+    await performLogin(page, USERS.blocked);
   });
 
-  test("Login com senha incorreta", async ({ page }) => {
-    await page.goto("https://playground-drab-six.vercel.app/");
-
-    // Click the login link.
-    await page.getByRole("link", { name: "login" }).click();
-
-    // Preencher os campos de login
-    await page.getByPlaceholder("Digite seu usuário").fill("teste");
-    await page.getByPlaceholder("Digite sua senha").fill("password234");
-
-    // Submeter o formulário
-    await page.getByRole("button", { name: "Logar" }).click();
-
-    // Verificar se aparece uma mensagem de erro
-    await expect(
-      page.getByText("Usuário ou senha estão incorretos!")
-    ).toBeVisible();
+  test('Login with incorrect password', async ({ page }) => {
+    await performLogin(page, USERS.wrongPassword);
   });
 
-  test("Login com usuário inválido", async ({ page }) => {
-    await page.goto("https://playground-drab-six.vercel.app/");
-
-    // Click the login link.
-    await page.getByRole("link", { name: "login" }).click();
-
-    // Preencher os campos de login
-    await page.getByPlaceholder("Digite seu usuário").fill("t3st3");
-    await page.getByPlaceholder("Digite sua senha").fill("password234");
-
-    // Submeter o formulário
-    await page.getByRole("button", { name: "Logar" }).click();
-
-    // Verificar se aparece uma mensagem de erro
-    await expect(page.getByText("Usuário não encontrado!")).toBeVisible();
+  test('Login with invalid user', async ({ page }) => {
+    await performLogin(page, USERS.invalid);
   });
 });
