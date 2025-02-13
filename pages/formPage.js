@@ -24,8 +24,29 @@ class FormPage {
 
   async submeterFormulario() {
     await this.page.getByRole('button', { name: 'Enviar' }).click();
+  }
+
+  async validateSucess(accounts) {
     await this.page.getByText('O formulário foi enviado com').click();
     await expect(this.page.getByText(accounts.message)).toBeVisible();
+  }
+
+  async validateFailure() {
+    await expect(
+      this.page.getByText('O campo nome é obrigatório.')
+    ).toBeVisible();
+    await expect(
+      this.page.getByText('O campo email é obrigatório.')
+    ).toBeVisible();
+    await expect(
+      this.page.getByText('O campo senha é obrigatório.')
+    ).toBeVisible();
+    await expect(
+      this.page.getByText('O campo país é obrigatório.')
+    ).toBeVisible();
+    await expect(
+      this.page.getByText('O campo gênero é obrigatório.')
+    ).toBeVisible();
   }
 }
 module.exports = { FormPage };
